@@ -522,26 +522,35 @@ function print_etc_overrides()
 }
 
 function check_dependencies() {
-    if ! command -v wget &>/dev/null; then
+    local missing_dependency=0
+    if ! package_is_installed software-properties-common; then
+        fancy_message warn "Missing dependency: software-properties-common"
+        fancy_message recommend "Please install software-properties-common to enable PPA support."
+    fi
+
+    if ! package_is_installed wget; then
         fancy_message error "wget is required to use deb-get, please install it and try again."
-        exit 1
+        missing_dependency=1
     fi
 
-    if ! command -v curl &>/dev/null; then
+    if ! package_is_installed curl; then
         fancy_message error "curl is required to use deb-get, please install it and try again."
-        exit 1
+        missing_dependency=1
     fi
 
-    if ! command -v lsb_release &>/dev/null; then
+    if ! package_is_installed lsb-release; then
         fancy_message error "lsb_release is required to use deb-get, please install it and try again."
-        exit 1
+        missing_dependency=1
     fi
 
-    if ! command -v grep &>/dev/null; then
+    if ! package_is_installed grep; then
         fancy_message error "grep is required to use deb-get, please install it and try again."
-        exit 1
+        missing_dependency=1
     fi
 
+    if [[ "$missing_dependency" -eq 1 ]]; then
+        exit 1
+    fi
 }
 
 check_dependencies
