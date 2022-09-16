@@ -511,6 +511,31 @@ function print_etc_overrides()
     fi
 }
 
+function check_dependencies() {
+    if ! command -v wget &>/dev/null; then
+        fancy_message error "wget is required to use deb-get, please install it and try again."
+        exit 1
+    fi
+
+    if ! command -v curl &>/dev/null; then
+        fancy_message error "curl is required to use deb-get, please install it and try again."
+        exit 1
+    fi
+
+    if ! command -v lsb_release &>/dev/null; then
+        fancy_message error "lsb_release is required to use deb-get, please install it and try again."
+        exit 1
+    fi
+
+    if ! command -v grep &>/dev/null; then
+        fancy_message error "grep is required to use deb-get, please install it and try again."
+        exit 1
+    fi
+
+}
+
+check_dependencies
+
 # Import deb_ functions in /etc/deb-get.d/**/* (if exists)
 load_etc_includes
 
