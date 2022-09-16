@@ -5,6 +5,16 @@ PACKAGE_INSTALLATION_COUNT=0
 
 readonly VERSION="0.3.5"
 
+
+if [[ "$DEB_GET_VERBOSE" = 1 ]]; then
+    APT_VERBOSITY=
+elif [[ "$DEB_GET_VERBOSE" = 2 ]]; then
+    APT_VERBOSITY=
+    set -xv
+else
+    APT_VERBOSITY="-q=2"
+fi
+
 # set a github auth token (e.g a PAT ) in DEBGET_TOKEN to get a bigger rate limit
 if [[ ! -z ${DEBGET_TOKEN} ]]; then
     export HEADERAUTH="\"Authorization: token ${DEBGET_TOKEN}\""
@@ -214,10 +224,10 @@ function install_apt() {
 
     if ! package_is_installed "${APP}"; then
         eula
-        ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y install "${APP}"
+        ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y install "${APP}"
     else
         if [ "${ACTION}" == "reinstall" ]; then
-            ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y --reinstall install "${APP}"
+            ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y --reinstall install "${APP}"
         else
             fancy_message info "${APP} is up to date."
         fi
@@ -235,10 +245,10 @@ function install_ppa() {
         update_apt
         if ! package_is_installed "${APP}"; then
             eula
-            ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y install "${APP}"
+            ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y install "${APP}"
         else
             if [ "${ACTION}" == "reinstall" ]; then
-                ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y --reinstall install "${APP}"
+                ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y --reinstall install "${APP}"
             else
                 fancy_message info "${APP} is up to date."
             fi
@@ -264,14 +274,14 @@ function install_deb() {
     if ! package_is_installed "${APP}"; then
         eula
         download_deb "${URL}"
-        ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y install "${CACHE_DIR}/${FILE}"
+        ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y install "${CACHE_DIR}/${FILE}"
     else
         if [ "${ACTION}" == "reinstall" ]; then
             download_deb "${URL}"
-            ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y --reinstall install "${CACHE_DIR}/${FILE}"
+            ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y --reinstall install "${CACHE_DIR}/${FILE}"
         elif dpkg --compare-versions "${VERSION_PUBLISHED}" gt "${VERSION_INSTALLED}"; then
             download_deb "${URL}"
-            ${ELEVATE} apt-get -q=2 -o Dpkg::Progress-Fancy="1" -y install "${CACHE_DIR}/${FILE}"
+            ${ELEVATE} apt-get $APT_VERBOSITY -o Dpkg::Progress-Fancy="1" -y install "${CACHE_DIR}/${FILE}"
         else
             fancy_message info "${FILE} is up to date."
         fi
