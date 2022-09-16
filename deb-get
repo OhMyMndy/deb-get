@@ -236,6 +236,10 @@ function install_apt() {
 }
 
 function install_ppa() {
+    if ! package_is_installed software-properties-common; then
+        fancy_message error "Missing dependency: software-properties-common"
+        exit 1
+    fi
     let "PACKAGE_INSTALLATION_TRIES+=1"
     local AAR_PARAMS="-y"
     if [ "$(dpkg -S "$(command -v apt-add-repository)" | cut -d':' -f1)" == "software-properties-common" ]; then
